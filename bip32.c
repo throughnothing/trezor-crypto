@@ -16,7 +16,7 @@ void hdnode_from_pub(uint32_t version, uint32_t depth, uint32_t fingerprint, uin
 	out->version = version;
 	out->depth = depth;
     // This should be the parent fingerprint
-	out->fingerprint = fingerprint;
+	out->parent_fingerprint = fingerprint;
 	out->child_num = child_num;
 	memcpy(out->chain_code, chain_code, 32);
 	memcpy(out->public_key, public_key, 33);
@@ -40,24 +40,23 @@ void hdnode_from_seed(uint8_t *seed, int seed_len, HDNode *out)
 {
 	out->version = BIP32_VERSION_MAINNET_PRIVATE;
 	out->depth = 0;
-	out->fingerprint = 0x00000000;
+	out->parent_fingerprint = 0x00000000;
 	out->child_num = 0;
 	// this can be done because private_key[32] and chain_code[32]
 	// form a continuous 64 byte block in the memory
 	hmac_sha512((uint8_t *)"Bitcoin seed", 12, seed, seed_len, out->private_key);
 	hdnode_fill_public_key(out);
 	hdnode_fill_address(out);
+	hdnode_fill_identifier(out);
 }
 
 void hdnode_descent(HDNode *inout, uint32_t i)
 {
 	uint8_t data[1 + 32 + 4];
 	bignum256 a, b;
-    
-    // Set the parent fingerprint
-    if( inout->depth > 0 ) {
-         
-    }
+
+	// First 32-bits of the identifier is the fingerprint
+	memcpy(&inout->parent_fingerprint, inout->identifier, 4);
 
 	if (i & 0x80000000) { // private derivation
 		data[0] = 0;
@@ -82,6 +81,7 @@ void hdnode_descent(HDNode *inout, uint32_t i)
 
 	hdnode_fill_public_key(inout);
 	hdnode_fill_address(inout);
+    hdnode_fill_identifier(inout);
 }
 
 void hdnode_fill_public_key(HDNode *xprv)
@@ -89,54 +89,43 @@ void hdnode_fill_public_key(HDNode *xprv)
 	ecdsa_get_public_key33(xprv->private_key, xprv->public_key);
 }
 
+void hdnode_fill_identifier(HDNode *node)
+{
+	uint8_t sha256_hash[SHA256_DIGEST_LENGTH];
+	SHA256_Raw((uint8_t *) node->public_key, 33, sha256_hash);
+	ripemd160(sha256_hash, SHA256_DIGEST_LENGTH, node->identifier);
+}
+
 void hdnode_fill_address(HDNode *xprv)
 {
 	ecdsa_get_address(xprv->public_key, hdnode_coin_version, xprv->address);
 }
 
-void hdnode_identifier(HDNode *node, char identifier[BIP32_IDENTIFIER_LENGTH])
-{
-    uint8_t ripemd160_hash[20], sha256_hash[SHA256_DIGEST_LENGTH];
-    SHA256_Raw((uint8_t *) node->public_key, 33, sha256_hash);
-    ripemd160(sha256_hash, SHA256_DIGEST_LENGTH, ripemd160_hash);
-
-    char *ptr = identifier;
-    for( int i = 0; i < 20; i++ ) {
-        sprintf(ptr, "%02x", ripemd160_hash[i] );
-        ptr += 2;
-    }
-}
-
 void hdnode_serialize_public(HDNode *node, char out[BIP32_SERIALIZED_LENGTH])
 {
-    HDSerializableNode snode;
+	HDSerializableNode snode;
 
-    snode.version = BIP32_VERSION_MAINNET_PUBLIC;
-    snode.depth = (uint8_t) node->depth;
-    snode.fingerprint = node->fingerprint;
-    snode.child_num = node->child_num;
-    memcpy(snode.chain_code, node->chain_code, 32);
-    memcpy(snode.key, node->public_key, 33);
+	snode.version = BIP32_VERSION_MAINNET_PUBLIC;
+	snode.depth = (uint8_t) node->depth;
+	snode.parent_fingerprint = node->parent_fingerprint;
+	snode.child_num = node->child_num;
+	memcpy(snode.chain_code, node->chain_code, 32);
+	memcpy(snode.key, node->public_key, 33);
 
-    uint8_t ripemd160_hash[20], sha256_hash[SHA256_DIGEST_LENGTH];
-    SHA256_Raw((uint8_t *) &snode, 33, sha256_hash);
-    ripemd160(sha256_hash, SHA256_DIGEST_LENGTH, ripemd160_hash);
+	uint8_t ripemd160_hash[20], sha256_hash[SHA256_DIGEST_LENGTH];
+	SHA256_Raw((uint8_t *) &snode, 28, sha256_hash);
+	ripemd160(sha256_hash, SHA256_DIGEST_LENGTH, ripemd160_hash);
 
-    /*char *ptr = &snode;*/
-    /*printf("\n\ntest\n\n");*/
-    /*for( int i = 0; i < 20; i++ ) {*/
-        /*printf("%02x", ripemd160_hash[i] );*/
-    /*}*/
-    /*printf("\n\ntest2\n\n");*/
+	/*char *ptr = &snode;*/
+	/*printf("\n\ntest\n\n");*/
+	/*for( int i = 0; i < 20; i++ ) {*/
+		/*printf("%02x", ripemd160_hash[i] );*/
+	/*}*/
+	/*printf("\n\ntest2\n\n");*/
 
 }
 
 void hdnode_serialize_private(HDNode *node, char out[BIP32_SERIALIZED_LENGTH])
-{
-
-}
-
-void hdnode_dserialize(char in[BIP32_SERIALIZED_LENGTH], HDNode *out)
 {
 
 }

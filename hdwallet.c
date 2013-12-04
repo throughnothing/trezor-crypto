@@ -19,15 +19,26 @@ uint8_t *fromhex(const char *str)
     return buf;
 }
 
+void hex_identifier (HDNode *node, char *hex_identifier) {
+    char *ptr = hex_identifier;
+    for( int i = 0; i < 20; i++ ) {
+        sprintf(ptr, "%02x", node->identifier[i] );
+        ptr += 2;
+    }
+}
+
 int main() {
     HDNode node;
-    char identifier[BIP32_IDENTIFIER_LENGTH];
-    char serialized_public[BIP32_SERIALIZED_LENGTH];
+    char identifier_1[BIP32_IDENTIFIER_LENGTH*2];
+
     /*hdnode_new(&node);*/
     hdnode_from_seed( fromhex("000102030405060708090a0b0c0d0e0f"), 16, &node);
+    printf("Depth: %d Fingerprint: %x\n", node.depth, node.parent_fingerprint);
+    hdnode_descent( &node, 0 );
+    printf("Depth: %d Fingerprint: %x\n", node.depth, node.parent_fingerprint);
 
-    hdnode_identifier(&node, identifier);
-    hdnode_serialize_public(&node, serialized_public);
-    printf("address: %s, identifier: %s\n", node.address, identifier);
+    /*hex_identifier(&node, identifier_1);*/
+    /*printf("address: %s, identifier: %s\n", node.address, identifier_1);*/
     return 1;
 }
+
