@@ -56,7 +56,7 @@ void hdnode_descent(HDNode *inout, uint32_t i)
 	bignum256 a, b;
 
 	// First 32-bits of the identifier is the fingerprint
-	memcpy(&inout->parent_fingerprint, inout->identifier, 4);
+	inout->parent_fingerprint = inout->fingerprint;
 
 	if (i & 0x80000000) { // private derivation
 		data[0] = 0;
@@ -94,6 +94,7 @@ void hdnode_fill_identifier(HDNode *node)
 	uint8_t sha256_hash[SHA256_DIGEST_LENGTH];
 	SHA256_Raw((uint8_t *) node->public_key, 33, sha256_hash);
 	ripemd160(sha256_hash, SHA256_DIGEST_LENGTH, node->identifier);
+	memcpy(&node->fingerprint, &node->identifier, 4);
 }
 
 void hdnode_fill_address(HDNode *xprv)

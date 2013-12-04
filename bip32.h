@@ -23,6 +23,7 @@ typedef struct {
 	uint8_t public_key[33];
 	char address[35];
 	uint8_t identifier[BIP32_IDENTIFIER_LENGTH];
+	uint32_t fingerprint;
 } HDNode;
 
 typedef struct {
