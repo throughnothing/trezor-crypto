@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-#define BIP32_SERIALIZED_LENGTH 112
+#define BIP32_SERIALIZED_LENGTH 82
+#define BIP32_SERIALIZED_BASE58_LENGTH 112
 #define BIP32_IDENTIFIER_LENGTH 20
 #define BIP32_FINGERPRINT_LENGTH 4
 
@@ -31,7 +32,7 @@ typedef struct {
 typedef struct {
 	uint32_t version;
 	uint8_t depth;
-	uint32_t parent_fingerprint;
+	uint8_t parent_fingerprint[BIP32_FINGERPRINT_LENGTH];
 	uint32_t child_num;
 	uint8_t chain_code[32];
 	uint8_t key[33];
@@ -51,7 +52,7 @@ void hdnode_fill_public_key(HDNode *xprv);
 void hdnode_fill_address(HDNode *xprv);
 void hdnode_fill_identifier(HDNode *node);
 
-void hdnode_serialize_public(HDNode *node, char out[BIP32_SERIALIZED_LENGTH]);
-void hdnode_serialize_private(HDNode *node, char out[BIP32_SERIALIZED_LENGTH]);
+void hdnode_serialize_public(HDNode *node, uint8_t out[BIP32_SERIALIZED_LENGTH]);
+void hdnode_serialize_private(HDNode *node, uint8_t out[BIP32_SERIALIZED_LENGTH]);
 
 #endif

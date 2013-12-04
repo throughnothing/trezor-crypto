@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 
 #include "bignum.h"
@@ -103,7 +102,7 @@ void hdnode_fill_address(HDNode *xprv)
 	ecdsa_get_address(xprv->public_key, hdnode_coin_version, xprv->address);
 }
 
-void hdnode_serialize_public(HDNode *node, char out[BIP32_SERIALIZED_LENGTH])
+void hdnode_serialize_public(HDNode *node, uint8_t out[BIP32_SERIALIZED_LENGTH])
 {
 	HDSerializableNode snode;
 
@@ -115,19 +114,11 @@ void hdnode_serialize_public(HDNode *node, char out[BIP32_SERIALIZED_LENGTH])
 	memcpy(snode.key, node->public_key, 33);
 
 	uint8_t ripemd160_hash[20], sha256_hash[SHA256_DIGEST_LENGTH];
-	SHA256_Raw((uint8_t *) &snode, 28, sha256_hash);
+	SHA256_Raw((uint8_t *) &snode, 78, sha256_hash);
 	ripemd160(sha256_hash, SHA256_DIGEST_LENGTH, ripemd160_hash);
-
-	/*char *ptr = &snode;*/
-	/*printf("\n\ntest\n\n");*/
-	/*for( int i = 0; i < 20; i++ ) {*/
-		/*printf("%02x", ripemd160_hash[i] );*/
-	/*}*/
-	/*printf("\n\ntest2\n\n");*/
-
 }
 
-void hdnode_serialize_private(HDNode *node, char out[BIP32_SERIALIZED_LENGTH])
+void hdnode_serialize_private(HDNode *node, uint8_t out[BIP32_SERIALIZED_LENGTH])
 {
 
 }

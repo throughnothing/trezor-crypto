@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "bip32.h"
+#include "bignum.h"
 
 uint8_t *fromhex(const char *str)
 {
@@ -49,20 +50,16 @@ void print_node (HDNode *node) {
 
 int main() {
     HDNode node;
-    char identifier_1[BIP32_IDENTIFIER_LENGTH*2];
+    uint8_t serialized_public[BIP32_SERIALIZED_LENGTH];
+    char serialized_public_b58[BIP32_SERIALIZED_BASE58_LENGTH];
 
     /*hdnode_new(&node);*/
     hdnode_from_seed(fromhex("000102030405060708090a0b0c0d0e0f"), 16, &node);
-    print_node( &node );
-    hdnode_descent( &node, 2 );
-    print_node( &node );
-    hdnode_descent( &node, 5 );
-    print_node( &node );
-    hdnode_descent( &node, 1 );
-    print_node( &node );
+    // serialized public address:
+    // xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8
 
-    /*hex_identifier(&node, identifier_1);*/
-    /*printf("address: %s, identifier: %s\n", node.address, identifier_1);*/
+    hdnode_serialize_public(&node, serialized_public);
+    /*printf("hex: %s, identifier: %s\n", node.address, identifier_1);*/
     return 1;
 }
 
