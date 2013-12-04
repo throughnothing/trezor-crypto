@@ -16,14 +16,16 @@
 typedef struct {
 	uint32_t version;
 	uint32_t depth;
-	uint32_t parent_fingerprint;
+	// Making this a byte-array to avoid endianness issues
+	uint8_t parent_fingerprint[BIP32_FINGERPRINT_LENGTH];
 	uint32_t child_num;
 	uint8_t private_key[32]; // private_key + chain_code have to
 	uint8_t chain_code[32];  // form a continuous 64 byte block
 	uint8_t public_key[33];
 	char address[35];
 	uint8_t identifier[BIP32_IDENTIFIER_LENGTH];
-	uint32_t fingerprint;
+	// Making this a byte-array to avoid endianness issues
+	uint8_t fingerprint[BIP32_FINGERPRINT_LENGTH];
 } HDNode;
 
 typedef struct {

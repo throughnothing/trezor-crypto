@@ -16,7 +16,7 @@ void hdnode_from_pub(uint32_t version, uint32_t depth, uint32_t fingerprint, uin
 	out->version = version;
 	out->depth = depth;
     // This should be the parent fingerprint
-	out->parent_fingerprint = fingerprint;
+	memcpy(&out->parent_fingerprint, &fingerprint, 4);
 	out->child_num = child_num;
 	memcpy(out->chain_code, chain_code, 32);
 	memcpy(out->public_key, public_key, 33);
@@ -40,7 +40,7 @@ void hdnode_from_seed(uint8_t *seed, int seed_len, HDNode *out)
 {
 	out->version = BIP32_VERSION_MAINNET_PRIVATE;
 	out->depth = 0;
-	out->parent_fingerprint = 0x00000000;
+	*out->parent_fingerprint = 0x00000000;
 	out->child_num = 0;
 	// this can be done because private_key[32] and chain_code[32]
 	// form a continuous 64 byte block in the memory
@@ -56,7 +56,8 @@ void hdnode_descent(HDNode *inout, uint32_t i)
 	bignum256 a, b;
 
 	// First 32-bits of the identifier is the fingerprint
-	inout->parent_fingerprint = inout->fingerprint;
+	memcpy(&inout->parent_fingerprint, &inout->fingerprint, 4 );
+	/*inout->parent_fingerprint = inout->fingerprint;*/
 
 	if (i & 0x80000000) { // private derivation
 		data[0] = 0;
@@ -108,8 +109,8 @@ void hdnode_serialize_public(HDNode *node, char out[BIP32_SERIALIZED_LENGTH])
 
 	snode.version = BIP32_VERSION_MAINNET_PUBLIC;
 	snode.depth = (uint8_t) node->depth;
-	snode.parent_fingerprint = node->parent_fingerprint;
 	snode.child_num = node->child_num;
+	memcpy(&snode.parent_fingerprint, &node->parent_fingerprint, 4);
 	memcpy(snode.chain_code, node->chain_code, 32);
 	memcpy(snode.key, node->public_key, 33);
 

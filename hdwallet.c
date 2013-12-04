@@ -29,11 +29,17 @@ void hex_identifier (HDNode *node, char *hex_identifier) {
 
 void print_node (HDNode *node) {
     printf("Depth: %d ", node->depth);
+
     printf("Fingerprint: ");
-        printf("%02x", node->parent_fingerprint & 0x000000FF);
-        printf("%02x", node->parent_fingerprint >> 8 & 0x000000FF);
-        printf("%02x", node->parent_fingerprint >> 16 & 0x000000FF);
-        printf("%02x", node->parent_fingerprint >> 24 & 0x000000FF);
+    for(int i = 0; i < BIP32_FINGERPRINT_LENGTH; i++) {
+        printf("%02x", node->parent_fingerprint[i]);
+    }
+    /*printf("\n");*/
+    /*printf("%02x", node->parent_fingerprint & 0x000000FF);*/
+    /*printf("%02x", node->parent_fingerprint >> 8 & 0x000000FF);*/
+    /*printf("%02x", node->parent_fingerprint >> 16 & 0x000000FF);*/
+    /*printf("%02x", node->parent_fingerprint >> 24 & 0x000000FF);*/
+
     printf(" Identifier: ");
     for(int i = 0; i < BIP32_IDENTIFIER_LENGTH; i++) {
         printf("%02x",node->identifier[i]);
@@ -48,11 +54,11 @@ int main() {
     /*hdnode_new(&node);*/
     hdnode_from_seed(fromhex("000102030405060708090a0b0c0d0e0f"), 16, &node);
     print_node( &node );
-    hdnode_descent( &node, 0 );
+    hdnode_descent( &node, 2 );
     print_node( &node );
-    hdnode_descent( &node, 0 );
+    hdnode_descent( &node, 5 );
     print_node( &node );
-    hdnode_descent( &node, 0 );
+    hdnode_descent( &node, 1 );
     print_node( &node );
 
     /*hex_identifier(&node, identifier_1);*/
